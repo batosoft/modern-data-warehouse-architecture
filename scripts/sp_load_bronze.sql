@@ -18,7 +18,7 @@ BEGIN
     SET NOCOUNT ON;
 
     PRINT '==========================================================';
-    PRINT '🚀 Starting Bronze Data Load Procedure';
+    PRINT 'Starting Bronze Data Load Procedure';
     PRINT '==========================================================';
 
     BEGIN TRY
@@ -38,7 +38,7 @@ BEGIN
             TABLOCK
         );
 
-        PRINT '✅ bronze.crm_cust_info loaded successfully.';
+        PRINT 'bronze.crm_cust_info loaded successfully.';
 
 
         --------------------------------------------------------------
@@ -56,7 +56,7 @@ BEGIN
             TABLOCK
         );
 
-        PRINT '✅ bronze.crm_prd_info loaded successfully.';
+        PRINT 'bronze.crm_prd_info loaded successfully.';
 
 
         --------------------------------------------------------------
@@ -74,7 +74,7 @@ BEGIN
             TABLOCK
         );
 
-        PRINT '✅ bronze.crm_sales_details loaded successfully.';
+        PRINT 'bronze.crm_sales_details loaded successfully.';
 
 
         --------------------------------------------------------------
@@ -92,7 +92,7 @@ BEGIN
             TABLOCK
         );
 
-        PRINT '✅ bronze.erp_loc_a101 loaded successfully.';
+        PRINT 'bronze.erp_loc_a101 loaded successfully.';
 
 
         --------------------------------------------------------------
@@ -110,7 +110,7 @@ BEGIN
             TABLOCK
         );
 
-        PRINT '✅ bronze.erp_cust_az12 loaded successfully.';
+        PRINT 'bronze.erp_cust_az12 loaded successfully.';
 
 
         --------------------------------------------------------------
@@ -128,19 +128,19 @@ BEGIN
             TABLOCK
         );
 
-        PRINT '✅ bronze.erp_px_cat_g1v2 loaded successfully.';
+        PRINT 'bronze.erp_px_cat_g1v2 loaded successfully.';
 
         --------------------------------------------------------------
         -- Summary
         --------------------------------------------------------------
         PRINT '==========================================================';
-        PRINT '✅ Bronze Layer Data Load Completed Successfully!';
+        PRINT 'Bronze Layer Data Load Completed Successfully!';
         PRINT '==========================================================';
 
     END TRY
 
     BEGIN CATCH
-        PRINT '❌ An error occurred during the Bronze data load.';
+        PRINT 'An error occurred during the Bronze data load.';
         PRINT ERROR_MESSAGE();
     END CATCH
 END
