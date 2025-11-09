@@ -1,0 +1,106 @@
+-- ==========================================================
+-- File: dim_products.sql
+-- Created/Updated: 2025-11-09
+-- Purpose: Create dimensional view for products in Gold layer,
+--          check duplicates, and filter out historical data.
+-- ==========================================================
+
+-- ==========================================================
+-- Optional: Rollback previous view
+-- ==========================================================
+DROP VIEW IF EXISTS gold.dim_products;
+
+
+-- ==========================================================
+-- 1. Full Product Details with Category Info
+-- ==========================================================
+SELECT
+    pn.prd_id,
+    pn.cat_id,
+    pn.prd_key,
+    pn.prd_nm,
+    pn.prd_cost,
+    pn.prd_line,
+    pn.prd_start_dt,
+    pc.cat,
+    pc.subcat,
+    pc.maintenance
+FROM silver.crm_prd_info pn
+LEFT JOIN silver.erp_px_cat_g1v2 pc
+    ON pn.cat_id = pc.id
+WHERE prd_end_dt IS NULL; -- Filter out all historical data
+
+
+-- ==========================================================
+-- 2. Check for Duplicate Product Keys
+-- ==========================================================
+SELECT prd_key, COUNT(*) 
+FROM (
+    SELECT
+        pn.prd_id,
+        pn.cat_id,
+        pn.prd_key,
+        pn.prd_nm,
+        pn.prd_cost,
+        pn.prd_line,
+        pn.prd_start_dt,
+        pc.cat,
+        pc.subcat,
+        pc.maintenance
+    FROM silver.crm_prd_info pn
+    LEFT JOIN silver.erp_px_cat_g1v2 pc
+        ON pn.cat_id = pc.id
+    WHERE prd_end_dt IS NULL
+) t
+GROUP BY prd_key
+HAVING COUNT(*) > 1;
+
+
+-- ==========================================================
+-- 3. Updated Query with Product Key Generation
+-- ==========================================================
+SELECT
+    ROW_NUMBER() OVER (ORDER BY pn.prd_start_dt, pn.prd_key) AS product_key,
+    pn.prd_id AS product_id,
+    pn.prd_key AS product_number,
+    pn.prd_nm AS product_name,
+    pn.cat_id AS category_id,
+    pc.cat AS category,
+    pc.subcat AS subcategory,
+    pc.maintenance,
+    pn.prd_cost AS cost,
+    pn.prd_line AS product_line,
+    pn.prd_start_dt AS start_date
+FROM silver.crm_prd_info pn
+LEFT JOIN silver.erp_px_cat_g1v2 pc
+    ON pn.cat_id = pc.id
+WHERE prd_end_dt IS NULL;
+
+
+-- ==========================================================
+-- 4. Create Dimensional Product View in Gold Layer
+-- ==========================================================
+CREATE OR REPLACE VIEW gold.dim_products AS
+SELECT
+    ROW_NUMBER() OVER (ORDER BY pn.prd_start_dt, pn.prd_key) AS product_key,
+    pn.prd_id AS product_id,
+    pn.prd_key AS product_number,
+    pn.prd_nm AS product_name,
+    pn.cat_id AS category_id,
+    pc.cat AS category,
+    pc.subcat AS subcategory,
+    pc.maintenance,
+    pn.prd_cost AS cost,
+    pn.prd_line AS product_line,
+    pn.prd_start_dt AS start_date
+FROM silver.crm_prd_info pn
+LEFT JOIN silver.erp_px_cat_g1v2 pc
+    ON pn.cat_id = pc.id
+WHERE prd_end_dt IS NULL;
+
+
+-- ==========================================================
+-- 5. Check the Created View
+-- ==========================================================
+SELECT * 
+FROM gold.dim_products;
